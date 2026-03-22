@@ -11,7 +11,7 @@ import 'swiper/css/pagination';
 
 
 interface MySweeperProps{
-    appId:number,
+    appId:number[],
     ImageUrls:string[],
 
 }
