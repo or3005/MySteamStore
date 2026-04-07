@@ -1,4 +1,5 @@
-import React,{useN} from 'react';
+import React,{} from 'react';
+import './GameGrid.scss'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Button, Container } from 'react-bootstrap';
 import Row from 'react-bootstrap/Row';
@@ -6,27 +7,30 @@ import Col from 'react-bootstrap/Col';
 import {GamePage} from '../../pages/GamePage'
 interface GameGridProp {
 
-    appId: number[],
+    appIds: number[],
     ImageUrls: string[],
 
 }
 
 
-const GameGrid = (appId: number[], ImageUrls: string[]) => {
+const GameGrid:React.FC<GameGridProp> = ({appIds, ImageUrls}) => {
 
 
 
 
 
-
+return(
     <ul className='card-container'>
 
-        {appId.map((Id, index) => (
+        {appIds.map((id, index) => (
             <li
-            className='game-card' key={"appId"}>
-                    onClick={
+            className='game-card' key={id}
+                    onClick={()=>
+                    {
                         
                     }
+                    }
+                    >
                 <img src={ImageUrls[index]}
                 ></img>
 
@@ -34,6 +38,6 @@ const GameGrid = (appId: number[], ImageUrls: string[]) => {
         ))}
 
     </ul>
-
+)
 }
 export default GameGrid;
