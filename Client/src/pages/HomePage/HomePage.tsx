@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import './Home.scss';
+import './HomePage.scss';
 import  {Sweeper}  from "../../components/MySweeper";
 import { GameGrid } from "../../components/GameGrid";
 import { TopPage } from "../../components/TopPage";
@@ -18,9 +18,9 @@ const HomePage = () => {
 
     }, [])
 
-    const appIds=games.map(game=>game.steamappid);
-    const imagesUrls=games.map(game=>game.imageUrl);
-
+    // const appIds=games.map(game=>game.steamappid);
+    // const imagesUrls=games.map(game=>game.imageUrl);
+    // const gameNames=games.map(game=>game.title); 
     
 
     return (
@@ -29,15 +29,12 @@ const HomePage = () => {
             <TopPage />
             <div className='sweeper-warpper'>
                 <Sweeper
-                    ImageUrls={imagesUrls}
-                    appId={appIds}
+                    games={games}
                 />
             </div>
             <div className='gamegrid-warpper'>
                 <GameGrid
-                    ImageUrls={imagesUrls}
-                    appIds={appIds}
-
+                    games={games}
                 />
             </div>
         </div >

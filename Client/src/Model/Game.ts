@@ -6,9 +6,9 @@ export interface Game {
     title: string;
     price?: string;
     description?: string;
-    imageUrl: string;
+    imageURL: string;
     screenshots?: string[];
-    steamappid: number;
+    steamAppId: number;
     genre?: string[];
     developers?: string[];
 
@@ -16,8 +16,8 @@ export interface Game {
 export const EMPTHY_GAME: Game = {
 
     title: "",
-    imageUrl: "",
-    steamappid: 0,
+    imageURL: "",
+    steamAppId: 0,
 
 
 

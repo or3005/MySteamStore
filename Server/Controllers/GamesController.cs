@@ -89,7 +89,7 @@ namespace Server.Controllers
             {
                 return BadRequest("Could not fetch games from Steam.");
             }
-
+            await _service.SyncSteamLibrary(steamGames);
             var allGames = await _service.GetAllGames();
             return Ok(allGames);
         }
@@ -116,5 +116,7 @@ namespace Server.Controllers
             return Ok(steamGame);
 
         }
+
+
     }
 }

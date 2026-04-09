@@ -1,43 +1,44 @@
-import React,{} from 'react';
+import React, { } from 'react';
 import './GameGrid.scss'
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Button, Container } from 'react-bootstrap';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import {GamePage} from '../../pages/GamePage'
+import { useNavigate } from 'react-router-dom';
+import {Game} from "../../Model/Game"
 interface GameGridProp {
 
-    appIds: number[],
-    ImageUrls: string[],
+    games:Game[],
 
 }
 
 
-const GameGrid:React.FC<GameGridProp> = ({appIds, ImageUrls}) => {
+const GameGrid: React.FC<GameGridProp> = ({ games }) => {
+
+    const navigate = useNavigate();
 
 
 
+    return (
+        <ul className='card-container'
+        style={{"--length":games.length}as React.CSSProperties}
+        >
 
-
-return(
-    <ul className='card-container'>
-
-        {appIds.map((id, index) => (
-            <li
-            className='game-card' key={id}
-                    onClick={()=>
-                    {
-                        
+            {games.map((game) => (
+                <li
+                    className='game-card' key={game.id}
+                    onClick={() => {
+                            navigate(`/game/${game.id}`,{state:{id:game.id}})
                     }
                     }
-                    >
-                <img src={ImageUrls[index]}
-                ></img>
+                >
+                    <div className='card-elements'>
 
-            </li>
-        ))}
+                        <span className='game-name' >{game.title}</span>
+                        <img className='game-image' src={game.imageURL} />
 
-    </ul>
-)
+                    </div>
+                </li>
+            ))}
+
+        </ul>
+    )
 }
 export default GameGrid;

@@ -46,46 +46,56 @@ namespace Server.Services
 
         }
 
-        public async Task<Game> GetMoreGameData(int appId)
+       public async Task<Game> GetMoreGameData(int appId)
+{
+    var thisGame = await _dbcontext.Games.FirstOrDefaultAsync(g => g.SteamAppId == appId);
+    if (thisGame == null) return null;
+
+    // נמשוך מידע רק אם התיאור ממש קצר או חסר (סימן שלא הבאנו את התיאור המלא עדיין)
+    if (string.IsNullOrEmpty(thisGame.Description) || thisGame.Description.Length < 200)
+    {
+        Console.WriteLine($"Fetching extra details for AppId: {appId}");
+        string url = $"https://store.steampowered.com/api/appdetails?appids={appId}";
+        
+        try 
         {
+            var response = await _httpClient.GetFromJsonAsync<Dictionary<string, SteamAppDetailsResponse>>(url);
 
-            var thisGame = await _dbcontext.Games.FirstOrDefaultAsync(g => g.SteamAppId == appId);
-            if (thisGame == null)
+            if (response != null && response.TryGetValue(appId.ToString(), out var details))
             {
-                return null;
-            }
-
-            if (string.IsNullOrEmpty(thisGame?.Description))
-            {
-                Console.WriteLine($"Fetching extra details for AppId: {appId}");
-                string url = $"https://store.steampowered.com/api/appdetails?appids={appId}";
-                var response = await _httpClient.GetFromJsonAsync<Dictionary<string, SteamAppDetailsResponse>>(url);
-
-                // 1. Check if the root dictionary response is not null to avoid NullReferenceException
-                if (response != null &&
-                    // 2. Safely try to find the game data using the AppId as a key. 
-                    // If found, the value is assigned to the 'details' variable.
-                    response.TryGetValue(appId.ToString(), out var details) &&
-                    // 3. Even if the key exists, Steam might return success: false (e.g., region-locked or invalid ID)
-                    details.Success)
+                if (details.Success) 
                 {
-                    // If all conditions are met, 'details' now contains the full game data
-
                     var data = details.Data;
-                    thisGame?.Description = data.Description;
+                    thisGame.Description = data.Description;
                     thisGame.Price = data.Price?.FinalPrice ?? "Free";
                     thisGame.Genre = data.Genres?.Select(g => g.Description).ToList() ?? new List<string>();
                     thisGame.Developers = data.Developers ?? new List<string>();
-                    thisGame.Screenshots=data.Screenshots.Select(s=>s.PathFull).ToList();
-                    await _dbcontext.SaveChangesAsync();
+                    thisGame.Screenshots = data.Screenshots?.Select(s => s.PathFull).ToList() ?? new List<string>();
                 }
+                else 
+                {
+                    Console.WriteLine($"AppId {appId} exists but has no store page (Legacy).");
+                    thisGame.Description = "This is a legacy title. Detailed store information is unavailable.";
+                    thisGame.Genre = new List<string> { "Legacy Content" };
+                    thisGame.Screenshots = new List<string> { thisGame.ImageURL }; 
+                }
+
+                await _dbcontext.SaveChangesAsync();
             }
-            else
-            {
-                Console.WriteLine("alredy have deteils");
-            }
-            return thisGame;
         }
+        catch (Exception ex)
+        {
+           
+            Console.WriteLine($"Steam API error for {appId}: {ex.Message}");
+        }
+    }
+    else
+    {
+        Console.WriteLine("Already have full details for this game.");
+    }
+
+    return thisGame;
+}
         public async Task<List<SteamOwnedGame>> GetOwnedGames()
         {
             var key = _config["SteamSettings:ApiKey"];

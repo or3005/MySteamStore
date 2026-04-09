@@ -1,6 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-
+using System.Text.Json.Serialization;
 
 namespace Server.Models
 {
@@ -18,13 +18,12 @@ namespace Server.Models
         public string? Price { get; set; }
 
         public string? Description { get; set; }
+               public string ImageURL { get; set; } 
 
-        public string ImageURL { get; set; }
-
-        public List<string>? Screenshots { get; set; }
+        public List<string>? Screenshots { get; set; } = [];
         public int? SteamAppId { get; set; }
-        public List<string> Genre { get; set; }
-        public List<string> Developers { get; set; }
+        public List<string> Genre { get; set; } = [];
+        public List<string> Developers { get; set; } = [];
 
     }
 

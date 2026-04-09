@@ -14,7 +14,7 @@ namespace Server.DTOs
         [JsonPropertyName("name")]
         public string Title { get; set; }
 
-        [JsonPropertyName("short_description")]
+        [JsonPropertyName("detailed_description")]
         public string Description { get; set; }
 
         [JsonPropertyName("header_image")]
