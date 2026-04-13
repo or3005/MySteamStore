@@ -29,7 +29,7 @@ const MySweeper: React.FC<MySweeperProps> = ({ games, screenshots, isSingle }) =
             slidesPerView={isSingle ? 1 : 3}
             spaceBetween={0}
             navigation
-            pagination={{ clickable: true }} // נבטל את הנקודות בעמוד המשחק
+            pagination={{ clickable: true }} 
             autoplay={{ delay: 3000 }}
             breakpoints={isSingle ? {} : {
                 0: { slidesPerView: 1 },

@@ -40,7 +40,11 @@ namespace Server.Controllers
         [HttpGet("postgres")]
         public async Task<IActionResult> GetAllGames()
         {
+            
             var Games = await _service.GetAllGames();
+            // if(Games==null){
+            //    GetSteamLibrary();
+            // }
             return Ok(Games);
         }
         [HttpPost]
