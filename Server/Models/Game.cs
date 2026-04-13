@@ -18,7 +18,7 @@ namespace Server.Models
         public string? Price { get; set; }
 
         public string? Description { get; set; }
-               public string ImageURL { get; set; } 
+        public string ImageURL { get; set; }
 
         public List<string>? Screenshots { get; set; } = [];
         public int? SteamAppId { get; set; }

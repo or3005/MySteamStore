@@ -1,22 +1,19 @@
-
+# שלב 1: בנייה (Build)
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
 
-WORKDIR /Server
+# מעתיקים את קובץ הפרויקט כדי לשחזר חבילות
+COPY Server.csproj ./
+RUN dotnet restore
 
+# מעתיקים את כל שאר הקוד ומבצעים Publish
 COPY . .
-
 RUN dotnet publish -c Release -o /app/publish
 
-
-
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 
-
-WORKDIR /Server
-
-COPY --from=build /app/publish/ /.Server
+# שלב 2: הרצה (Runtime)
+FROM mcr.microsoft.com/dotnet/aspnet:10.0
+WORKDIR /app
+COPY --from=build /app/publish .
 
 EXPOSE 5210
-
-RUN echo "build Server"
-
 ENTRYPOINT ["dotnet", "Server.dll"]

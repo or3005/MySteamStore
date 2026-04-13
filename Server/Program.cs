@@ -16,7 +16,8 @@ string? postgresConnection = builder.Configuration.GetConnectionString("DefaultC
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReact",
-        policy => policy.WithOrigins("http://localhost:3000") 
+        policy => policy.WithOrigins("http://localhost:3000", "http://localhost")
+
                         .AllowAnyMethod()
                         .AllowAnyHeader());
 });
@@ -26,6 +27,8 @@ builder.Services.AddDbContext<DataContext>(options =>
 
 builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<ISteamService, SteamService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IMessageService, MessageService>();
 
 builder.Services.AddHttpClient();
 builder.Services.AddSwaggerGen();
@@ -35,13 +38,18 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<DataContext>();
+    db.Database.Migrate();
+}
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
     app.MapOpenApi();
-   // app.MapScalarApiReference();
+    // app.MapScalarApiReference();
 }
 
 app.UseCors("AllowReact");
@@ -66,6 +74,7 @@ app.MapGet("/weatherforecast", () =>
     return forecast;
 })
 .WithName("GetWeatherForecast");
+
 
 app.Run();
 

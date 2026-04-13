@@ -12,4 +12,3 @@ FROM nginx:alpine
 # מעתיקים מה-builder רק את תיקיית ה-build המוכנה אל תוך התיקייה של Nginx
 COPY --from=builder /app/build /usr/share/nginx/html
 EXPOSE 80
-# Nginx רץ אוטומטית, אין צורך ב-CMD מיוחד

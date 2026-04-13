@@ -40,12 +40,19 @@ namespace Server.Controllers
         [HttpGet("postgres")]
         public async Task<IActionResult> GetAllGames()
         {
-            
-            var Games = await _service.GetAllGames();
-            // if(Games==null){
-            //    GetSteamLibrary();
-            // }
-            return Ok(Games);
+            var games = await _service.GetAllGames();
+
+            if (games == null || !games.Any())
+            {
+                var steamGames = await _steamService.GetOwnedGames();
+                if (steamGames != null && steamGames.Count > 0)
+                {
+                    await _service.SyncSteamLibrary(steamGames);
+                    games = await _service.GetAllGames();
+                }
+            }
+
+            return Ok(games);
         }
         [HttpPost]
         public async Task<IActionResult> PostGame(Game game)
