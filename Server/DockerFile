@@ -1,0 +1,22 @@
+
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+
+WORKDIR /Server
+
+COPY . .
+
+RUN dotnet publish -c Release -o /app/publish
+
+
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 
+
+WORKDIR /Server
+
+COPY --from=build /app/publish/ /.Server
+
+EXPOSE 5210
+
+RUN echo "build Server"
+
+ENTRYPOINT ["dotnet", "Server.dll"]

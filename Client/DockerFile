@@ -1,0 +1,15 @@
+# שלב 1: בנייה (Node)
+FROM node:18-alpine AS builder 
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+# אנחנו בונים את ה-React כאן, במטבח של Node
+RUN npm run build 
+
+# שלב 2: הגשה (Nginx)
+FROM nginx:alpine
+# מעתיקים מה-builder רק את תיקיית ה-build המוכנה אל תוך התיקייה של Nginx
+COPY --from=builder /app/build /usr/share/nginx/html
+EXPOSE 80
+# Nginx רץ אוטומטית, אין צורך ב-CMD מיוחד

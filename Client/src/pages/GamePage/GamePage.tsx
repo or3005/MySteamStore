@@ -32,7 +32,7 @@ const GamePage = () => {
             if (gamefromDB.steamAppId === 0) {
                 setGame({
                     ...gamefromDB,
-                    description: "Legacy Title: Information not available.",
+                    description: "Legacy Title: Information not ava ilable.",
                     screenshots: [gamefromDB.imageURL]
                 });
                 return;

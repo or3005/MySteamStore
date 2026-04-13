@@ -1,23 +1,44 @@
+version: '3.8'
 
 services:
-  
-  postgres:
-    image: postgres:15-alpine
-    container_name: postgres
-    restart: unless-stopped
+  # 1. בסיס הנתונים (PostgreSQL)
+  db:
+    image: postgres:latest
+    container_name: gamestore-db
+    restart: always
     environment:
-      - POSTGRES_DB=GameStoreDb
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: gamestore_db
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      - pgdata:/var/lib/postgresql/data
+
+  # 2. השרת (Backend - .NET 10)
+  server:
+    build:
+      context: ./Server
+      dockerfile: Dockerfile
+    container_name: gamestore-server
+    depends_on:
+      - db
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=db;Database=gamestore_db;Username=user;Password=password
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "5210:5210"
+
+  # 3. הפרונטאנד (Frontend - React)
+  client:
+    build:
+      context: ./Client
+      dockerfile: Dockerfile
+    container_name: gamestore-client
+    depends_on:
+      - server
+    ports:
+      - "80:80"
 
 volumes:
-  postgres_data:
+  pgdata:
