@@ -1,21 +1,16 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import {HomePage} from './pages/HomePage'
-import {GamePage }from './pages/GamePage'
-
+import { SocketProvider } from "./Socket/SocketProvider";
 
 function App() {
-  return (
-    <Router>
-      <div className="App">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
+    const userId = "some-user-guid"; // from login, state, etc.
 
-          <Route path="/game/:appId" element={<GamePage />} />
-        </Routes>
-      </div>
-
-    </Router>
-  );
+    return (
+        <SocketProvider userId={userId}>
+            <Router>
+                <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/game/:appId" element={<GamePage />} />
+                </Routes>
+            </Router>
+        </SocketProvider>
+    );
 }
-
-export default App;
