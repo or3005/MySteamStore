@@ -40,17 +40,13 @@ namespace Server.Hubs
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
             var result = Guid.TryParse(Context.GetHttpContext().Request.Query["userId"], out Guid userId);
-            if (!result)
+            if (result)
             {
-                return;
-            }
-            result=_connection.TryGetValue(userId,out var connectionId);
-            if (!result)
-            {
-                throw exception;
-            }
-            
             _connection.TryRemove(userId,out _);
+                
+            }
+        
+            
 
             await base.OnDisconnectedAsync(exception);
         }
@@ -75,7 +71,7 @@ namespace Server.Hubs
                 throw new HubException("cant get the sender conaction ID");
             }
             conactionIds.Add(sender_connectionid);
-            await Clients.Clients(conactionIds).SendAsync("receive message", message);
+            await Clients.Clients(conactionIds).SendAsync("ReceiveMessage", message);
 
 
         }

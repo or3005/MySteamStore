@@ -31,12 +31,12 @@ namespace Server.Controllers
         }
 
         [HttpPost("send-message")]
-        public async Task<IActionResult> SendMessage(string content,Guid sender,Guid receiver)
+        public async Task<IActionResult> SendMessage([FromQuery] string content,[FromQuery] Guid sender,[FromQuery] Guid receiver)
         {
             var message=await _service.SaveMessage(content,sender,receiver);
             if (message == null)
             {
-                BadRequest("CANT SEND MESSAGE");
+               return BadRequest("CANT SEND MESSAGE");
             }
             return Ok(message);
 

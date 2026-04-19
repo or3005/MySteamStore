@@ -24,7 +24,7 @@ namespace Server.Controllers
 
 
         [HttpPost("register")]
-        public async Task<IActionResult> RegisterUser(string name, string password)
+        public async Task<IActionResult> RegisterUser([FromQuery] string name, [FromQuery] string password)
         {
 
 
@@ -38,10 +38,10 @@ namespace Server.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> LoginController(string name, string passw)
+        public async Task<IActionResult> LoginController([FromQuery] string name, [FromQuery] string password)
         {
 
-            var user = await _service.Login(name, passw);
+            var user = await _service.Login(name, password);
             if (user == null)
             {
                 return BadRequest("coud not login or the user dont exist");

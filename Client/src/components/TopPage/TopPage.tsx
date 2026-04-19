@@ -6,7 +6,6 @@ const TopPage: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // אנחנו לא רוצים להציג כפתור "חזור" אם אנחנו כבר בדף הבית
     const isHomePage = location.pathname === '/';
 
     return (
@@ -17,7 +16,7 @@ const TopPage: React.FC = () => {
                 </button>
             )}
             <div className="logo">GAME STORE</div>
-            <div className="placeholder"></div> {/* מקום לחיפוש בעתיד */}
+            <div className="placeholder"></div>
         </div>
     );
 
