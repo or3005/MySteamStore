@@ -1,17 +1,19 @@
 using System.ComponentModel.DataAnnotations;
-
+using Server.DTOs;
 namespace Server.Models
 {
     public class User
     {
         [Key]
         [Required]
-        public Guid Id{get;set;}=Guid.NewGuid();
+        public Guid Id { get; set; } = Guid.NewGuid();
 
+        public string? UserName { get; set; }
 
-        public string? UserName {get;set;}
+        public string? Password { get; set; }
+        public string? RefreshToken { get; set; }
 
-        public string? Password {get;set;}
+        public DateTime? RefreshTokenExpiryTime { get; set; }
 
     }
 

@@ -1,6 +1,8 @@
 using Server.Data;
 using Microsoft.EntityFrameworkCore;
 using Server.Models;
+using System.Security.Cryptography;
+using Server.DTOs;
 
 
 namespace Server.Services
@@ -34,20 +36,78 @@ namespace Server.Services
             return user;
         }
 
-        public async Task<User> GetUserById(Guid Id)
+        public async Task<UserResponseDto> GetUserById(Guid Id)
         {
-            var user = await _dbcontext.Users.FindAsync(Id);
+            // var user = await _dbcontext.Users.Where();
 
-            return user;
+            var respone = await _dbcontext.Users
+            .Where(user => user.Id == Id)
+            .Select(user => new UserResponseDto(user.Id, user.UserName!)).
+            FirstOrDefaultAsync();
+            if (respone == null)
+            {
+                Console.Error.WriteLine("Problme in snew UserRsponse save");
+                return null;
+            }
+            return respone;
         }
 
-        public async Task<List<User>> GetAllUsers()
+        // secure function that create new Key for the token
+        public async Task CreateRefreshToken(User user)
         {
-            
-            var users=await _dbcontext.Users.ToListAsync();
+            var newKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+
+            user.RefreshToken = newKey;
+
+            DateTime now = DateTime.UtcNow;
+            DateTime expiresAt = now.AddDays(7);
+            user.RefreshTokenExpiryTime = expiresAt;
+
+            await UpdateUser(user.Id, null, null, newKey, expiresAt);
+        }
+        public async Task<List<UserResponseDto>> GetAllUsers()
+        {
+
+            var users = await _dbcontext.Users.Select(user => new UserResponseDto(user.Id, user.UserName!))
+            .ToListAsync();
             return users;
 
 
+        }
+        public async Task<User> UpdateUser(Guid Id, string? userName, string? password, string? RefreshToken, DateTime? RefreshTokenExpiryTime)
+        {
+            var user = await _dbcontext.Users.FindAsync(Id);
+            if (user == null)
+            {
+                Console.Error.WriteLine("user dosent exist");
+                return null;
+            }
+
+            if (userName != null)
+            {
+                user.UserName = userName;
+
+
+            }
+            if (password != null)
+            {
+                user.Password = password;
+
+
+            }
+            if (RefreshToken != null)
+            {
+                user.RefreshToken = RefreshToken;
+
+
+            }
+            if (RefreshTokenExpiryTime != null)
+            {
+                user.RefreshTokenExpiryTime = RefreshTokenExpiryTime;
+
+            }
+            await _dbcontext.SaveChangesAsync();
+            return user;
         }
     }
 

@@ -1,5 +1,5 @@
 using Server.Models;
-
+using Server.DTOs;
 
 
 
@@ -14,8 +14,10 @@ namespace Server.Services
 
         public Task<User> Login(string userName, string password);
 
-        public Task<User> GetUserById(Guid Id);
-        public  Task<List<User>> GetAllUsers();
+        public Task<UserResponseDto> GetUserById(Guid Id);
+        public Task<List<UserResponseDto>> GetAllUsers();
+        public Task CreateRefreshToken(User user);
+        public Task<User> UpdateUser(Guid Id, string? userName, string? password, string? RefreshToken, DateTime? RefreshTokenExpiryTime);
     }
 
 
