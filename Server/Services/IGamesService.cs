@@ -13,7 +13,7 @@ namespace Server.Services
 
 
 
-        public Task<List<Game>> GetAllGames();
+        public Task<List<GameListItemDto>> GetAllGames();
 
         public Task<Game> GetGameById(Guid id);
 

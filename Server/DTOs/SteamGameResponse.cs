@@ -42,7 +42,7 @@ namespace Server.DTOs
     public class SteamPrice
     {
         [JsonPropertyName("final_formatted")]
-        public string FinalPrice { get; set; }
+        public int FinalPrice { get; set; }
     }
 
     public class SteamGenre

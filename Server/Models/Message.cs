@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
-
+using Server.Models;
 namespace Server.Models
 {
-    
+
 
 
 
@@ -10,15 +10,18 @@ namespace Server.Models
     {
         [Key]
         [Required]
-        public Guid Id{get;set;}=Guid.NewGuid();
+        public Guid Id { get; set; } = Guid.NewGuid();
 
-        public string? Content {get;set;}
+        public string? Content { get; set; }
 
-        public Guid? ReceiverId {get;set;}
+        public User Receiver { get; set; } = null!;
+        public Guid ReceiverId { get; set; }
 
-        public Guid? SenderId {get;set;}
-        
-        public DateTime CreateAt {get;set;}
+        public Guid SenderId { get; set; }
+
+        public User Sender { get; set; } = null!;
+
+        public DateTime CreateAt { get; set; }
 
     }
 

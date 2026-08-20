@@ -27,9 +27,9 @@ namespace Server.Services
         }
 
 
-        public async Task<List<Game>> GetAllGames()
+        public async Task<List<GameListItemDto>> GetAllGames()
         {
-            var Games = await dbcontext.Games.ToListAsync();
+            var Games = await dbcontext.Games.Select(game=>new GameListItemDto(game.Id,game.Title,game.Price,game.ImageURL)).ToListAsync();
             return Games;
 
         }
@@ -79,7 +79,7 @@ namespace Server.Services
                 editedgame.Description = game.Description;
                 ShouldSave = true;
             }
-            if (game.Price != null)
+            if (game.Price != 0)
             {
 
                 editedgame.Price = game.Price;

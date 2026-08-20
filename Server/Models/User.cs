@@ -15,6 +15,9 @@ namespace Server.Models
 
         public DateTime? RefreshTokenExpiryTime { get; set; }
 
+        public ICollection<Message> SentMessages { get;  } = new List<Message>();
+        public  ICollection<Message> ReceivedMessages { get;  } = new List<Message>();
+
     }
 
 

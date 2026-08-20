@@ -67,7 +67,7 @@ namespace Server.Services
                 {
                     var data = details.Data;
                     thisGame.Description = data.Description;
-                    thisGame.Price = data.Price?.FinalPrice ?? "Free";
+                    thisGame.Price = data.Price?.FinalPrice ?? 0;
                     thisGame.Genre = data.Genres?.Select(g => g.Description).ToList() ?? new List<string>();
                     thisGame.Developers = data.Developers ?? new List<string>();
                     thisGame.Screenshots = data.Screenshots?.Select(s => s.PathFull).ToList() ?? new List<string>();
