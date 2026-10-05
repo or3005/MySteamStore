@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.SignalR;
 using Server.Services;
 
@@ -13,67 +14,57 @@ namespace Server.Hubs
     public class ChatHub : Hub
     {
 
-        private static ConcurrentDictionary<Guid, string> _connection { get; set; } = new();
+        // private static ConcurrentDictionary<Guid, string> _connection { get; set; } = new();
+
+        private readonly IConnectionTracker _connectionTracker;
         private readonly IMessageService _service;
         // private readonly DataContext _dbcontext;
-        public ChatHub(IMessageService service)
+        public ChatHub(IMessageService service, IConnectionTracker connectionTracker)
         {
 
             _service = service;
-            // _dbcontext=dbcontext;
-
+            _connectionTracker = connectionTracker;
         }
 
 
         public override async Task OnConnectedAsync()
         {
-            var result = Guid.TryParse(Context.GetHttpContext().Request.Query["userId"], out Guid userId);
+            var result = Guid.TryParse(Context.GetHttpContext()?.Request.Query["userId"], out Guid userId);
             if (!result)
             {
                 throw new HubException("Cant get userId");
             }
-            var connectionid = Context.ConnectionId;
-            _connection.TryAdd(userId, connectionid);
-
+            _connectionTracker.Add(userId, Context.ConnectionId);
             await base.OnConnectedAsync();
         }
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            var result = Guid.TryParse(Context.GetHttpContext().Request.Query["userId"], out Guid userId);
+            var result = Guid.TryParse(Context.GetHttpContext()?.Request.Query["userId"], out Guid userId);
             if (result)
             {
-            _connection.TryRemove(userId,out _);
-                
-            }
-        
-            
+                _connectionTracker.Remove(userId, Context.ConnectionId);
 
+            }
             await base.OnDisconnectedAsync(exception);
         }
 
         public async Task SendMessage(string content, Guid senderId, Guid receiverId)
         {
-            var message = await _service.SaveMessage(content, senderId, receiverId);
-            if (message == null)
+             var message = await _service.SaveMessage(content, senderId, receiverId);
+
+            var targets = new List<string>();
+
+            // phonebook lookup: receiver's user id -> connection id (null if offline)
+            var receiverConnection = _connectionTracker.GetConnectionId(receiverId);
+            if (receiverConnection != null)
             {
-                throw new HubException("can't send message");
+                targets.Add(receiverConnection);
             }
 
-            var conactionIds = new List<string>();
-            var result = _connection.TryGetValue(receiverId, out var receiver_connectionid);
-            if (result)
-            {
-                conactionIds.Add(receiver_connectionid);
-            }
-            result = _connection.TryGetValue(senderId, out var sender_connectionid);
-            if (!result)
-            {
-                throw new HubException("cant get the sender conaction ID");
-            }
-            conactionIds.Add(sender_connectionid);
-            await Clients.Clients(conactionIds).SendAsync("ReceiveMessage", message);
+            // the sender is the caller - no lookup needed
+            targets.Add(Context.ConnectionId);
 
-
+            await Clients.Clients(targets).SendAsync("ReceiveMessage", message);
         }
 
 

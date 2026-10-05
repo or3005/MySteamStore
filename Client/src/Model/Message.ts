@@ -2,17 +2,17 @@
 
 export interface Message {
 
-    id?: string;
+    id: string;
     content?: string;
-    receiverId?: string;
-    senderId?: string;
+    receiverId: string;
+    senderId: string;
     createAt?: string;
 
 }
-export const EMPTY_MESSAGE: Message = {
+// export const EMPTY_MESSAGE: Message = {
 
-    content: "",
-    receiverId: "",
-    senderId: "",
+//     content: "",
+//     receiverId: "",
+//     senderId: "",
 
-}
+// }

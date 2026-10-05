@@ -39,6 +39,7 @@ builder.Services.AddSignalR();
 
 builder.Services.AddControllers();
 
+builder.Services.AddSingleton<IConnectionTracker, ConnectionTracker>();
 
 var app = builder.Build();
 

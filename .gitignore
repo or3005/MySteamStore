@@ -51,3 +51,23 @@ Thumbs.db
 
 # Entity Framework Migrations
 Server/Migrations/
+
+# AI tools (Claude, Cursor, Copilot, Windsurf, Aider, Gemini, etc.)
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+.mcp.json
+AGENTS.md
+.cursor/
+.cursorrules
+.cursorignore
+.github/copilot-instructions.md
+.github/instructions/
+.github/prompts/
+.windsurf/
+.windsurfrules
+.aider*
+.continue/
+.codeium/
+.gemini/
+GEMINI.md

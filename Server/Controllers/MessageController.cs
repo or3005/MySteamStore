@@ -1,6 +1,8 @@
 using Server.Models;
 using Microsoft.AspNetCore.Mvc;
 using Server.Services;
+using Server.Hubs;
+using Microsoft.AspNetCore.SignalR;
 
 
 namespace Server.Controllers
@@ -12,16 +14,20 @@ namespace Server.Controllers
     public class MessagesController : ControllerBase
     {
         private readonly IMessageService _service;
+        private readonly IHubContext<ChatHub> _hub;
+        private readonly IConnectionTracker _connectionTracker;
 
-        public MessagesController(IMessageService service)
+        public MessagesController(IMessageService service, IHubContext<ChatHub> hub, IConnectionTracker connectionTracker)
         {
             _service = service;
+            _hub = hub;
+            _connectionTracker = connectionTracker;
         }
 
         [HttpGet("history/{user1}/{user2}")]
-        public async Task<IActionResult> GetMessages(Guid user1,Guid user2)
+        public async Task<IActionResult> GetMessages(Guid user1, Guid user2)
         {
-            var message=await _service.GetChatHistory(user1,user2);
+            var message = await _service.GetChatHistory(user1, user2);
 
             // if (message == null)
             // {
@@ -31,16 +37,27 @@ namespace Server.Controllers
         }
 
         [HttpPost("send-message")]
-        public async Task<IActionResult> SendMessage([FromQuery] string content,[FromQuery] Guid sender,[FromQuery] Guid receiver)
+        public async Task<IActionResult> SendMessage([FromQuery] string content, [FromQuery] Guid sender, [FromQuery] Guid receiver)
         {
-            var message=await _service.SaveMessage(content,sender,receiver);
+            var message = await _service.SaveMessage(content, sender, receiver);
+
             if (message == null)
             {
-               return BadRequest("CANT SEND MESSAGE");
+                return BadRequest("CANT SEND MESSAGE");
             }
+            var connectionIds = new List<string>();
+            var senderConnectionId = _connectionTracker.GetConnectionId(sender);
+            if (senderConnectionId != null)
+            {
+                connectionIds.Add(senderConnectionId);
+            }
+            var receiverConnectionId = _connectionTracker.GetConnectionId(receiver);
+            if (receiverConnectionId != null)
+            {
+                connectionIds.Add(receiverConnectionId);
+            }
+            await _hub.Clients.Clients(connectionIds).SendAsync("ReceiveMessage", message);
             return Ok(message);
-
-
 
         }
 
