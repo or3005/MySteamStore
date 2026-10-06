@@ -13,9 +13,6 @@ namespace Server.Hubs
 
     public class ChatHub : Hub
     {
-
-        // private static ConcurrentDictionary<Guid, string> _connection { get; set; } = new();
-
         private readonly IConnectionTracker _connectionTracker;
         private readonly IMessageService _service;
         // private readonly DataContext _dbcontext;
@@ -26,7 +23,6 @@ namespace Server.Hubs
             _connectionTracker = connectionTracker;
         }
 
-
         public override async Task OnConnectedAsync()
         {
             var result = Guid.TryParse(Context.GetHttpContext()?.Request.Query["userId"], out Guid userId);
@@ -36,6 +32,7 @@ namespace Server.Hubs
             }
             _connectionTracker.Add(userId, Context.ConnectionId);
             await base.OnConnectedAsync();
+
         }
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
@@ -50,24 +47,18 @@ namespace Server.Hubs
 
         public async Task SendMessage(string content, Guid senderId, Guid receiverId)
         {
-             var message = await _service.SaveMessage(content, senderId, receiverId);
-
-            var targets = new List<string>();
-
-            // phonebook lookup: receiver's user id -> connection id (null if offline)
-            var receiverConnection = _connectionTracker.GetConnectionId(receiverId);
-            if (receiverConnection != null)
+            var message = await _service.SaveMessage(content, senderId, receiverId);
+            var connectionIds = new List<string>();
+            var receiverConnectionId = _connectionTracker.GetConnectionId(receiverId);
+            if (receiverConnectionId != null)
             {
-                targets.Add(receiverConnection);
+                connectionIds.Add(receiverConnectionId);
             }
+            connectionIds.Add(Context.ConnectionId);
+            await Clients.Clients(connectionIds).SendAsync(ChatEvents.ReceiveMessage, message);
 
-            // the sender is the caller - no lookup needed
-            targets.Add(Context.ConnectionId);
 
-            await Clients.Clients(targets).SendAsync("ReceiveMessage", message);
         }
 
-
     }
-
 }

@@ -45,20 +45,17 @@ namespace Server.Controllers
             {
                 return BadRequest("CANT SEND MESSAGE");
             }
-            var connectionIds = new List<string>();
-            var senderConnectionId = _connectionTracker.GetConnectionId(sender);
-            if (senderConnectionId != null)
-            {
-                connectionIds.Add(senderConnectionId);
-            }
             var receiverConnectionId = _connectionTracker.GetConnectionId(receiver);
             if (receiverConnectionId != null)
             {
-                connectionIds.Add(receiverConnectionId);
+                await _hub.Clients.Client(receiverConnectionId).SendAsync(ChatEvents.ReceiveMessage, message);
             }
-            await _hub.Clients.Clients(connectionIds).SendAsync("ReceiveMessage", message);
-            return Ok(message);
+            // else
+            // {
+            //     _connectionTracker.Add(receiver, connectionIds);
 
+            // }
+            return Ok(message);
         }
 
     }
