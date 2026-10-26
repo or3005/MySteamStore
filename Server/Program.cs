@@ -1,4 +1,5 @@
 
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Server.Data;
 using Server.Hubs;
@@ -39,7 +40,8 @@ builder.Services.AddSignalR();
 
 builder.Services.AddControllers();
 
-builder.Services.AddSingleton<IConnectionTracker, ConnectionTracker>();
+// Tells SignalR how to map a connection to a user (see QueryStringUserIdProvider).
+builder.Services.AddSingleton<IUserIdProvider, QueryStringUserIdProvider>();
 
 var app = builder.Build();
 

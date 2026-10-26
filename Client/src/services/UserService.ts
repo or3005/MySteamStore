@@ -28,20 +28,24 @@ export async function getAllusers() {
 
 }
 
-export async function Register(name: string, password: string) {
-  return await userRequest<User>(
-    `/register?name=${encodeURIComponent(name)}&password=${encodeURIComponent(password)}`, {
+// The server reads [FromBody] - so the data goes as JSON in the body, not in the URL
+// (a password in the URL ends up in server logs and browser history).
+function jsonBody(data: object): RequestInit {
+  return {
     method: "POST",
-  })
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  };
+}
+
+export async function Register(name: string, password: string) {
+  return await userRequest<User>("/register", jsonBody({ userName: name, password }))
 }
 
 
 
 export async function login(name: string, password: string) {
-  return await userRequest<User>(
-    `/login?name=${encodeURIComponent(name)}&password=${encodeURIComponent(password)}`, {
-    method: "POST",
-  })
+  return await userRequest<User>("/login", jsonBody({ userName: name, password }))
 }
 
 

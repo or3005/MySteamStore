@@ -29,14 +29,5 @@ export async function GetMessages(id1: string, id2: string) {
     })
 }
 
-export async function SendMessage(content: string, senderId: string, reciverId: string) {
-
-
-    return await messageRequest<Message>(`/send-message?content=${encodeURIComponent(content)}&sender=${encodeURIComponent(senderId)}&receiver=${encodeURIComponent(reciverId)}`,
-
-        {
-            method: "POST"
-        })
-
-
-}
+// Sending a message goes through the SignalR hub, not REST:
+// connection.invoke("SendMessage", { receiverId, content })

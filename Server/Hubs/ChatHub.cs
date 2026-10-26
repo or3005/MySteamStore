@@ -1,64 +1,61 @@
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.SignalR;
+using Server.DTOs;
 using Server.Services;
-
-using System.Collections.Concurrent;
 
 
 namespace Server.Hubs
 {
-
-
-
-
-    public class ChatHub : Hub
+    // A Hub is NOT long-lived: SignalR creates a new instance for every call (connect, each SendMessage, disconnect).
+    // So never keep state in fields here - state that must outlive one call lives in a service or the DB.
+    public class ChatHub : Hub<IChatClient>
     {
-        private readonly IConnectionTracker _connectionTracker;
-        private readonly IMessageService _service;
-        // private readonly DataContext _dbcontext;
-        public ChatHub(IMessageService service, IConnectionTracker connectionTracker)
-        {
+        public const int MaxMessageLength = 2000;
 
+        private readonly IMessageService _service;
+
+        public ChatHub(IMessageService service)
+        {
             _service = service;
-            _connectionTracker = connectionTracker;
         }
 
         public override async Task OnConnectedAsync()
         {
-            var result = Guid.TryParse(Context.GetHttpContext()?.Request.Query["userId"], out Guid userId);
-            if (!result)
+            // Context.UserIdentifier was filled by QueryStringUserIdProvider.
+            if (Context.UserIdentifier == null)
             {
-                throw new HubException("Cant get userId");
+                throw new HubException("Missing or invalid userId");
             }
-            _connectionTracker.Add(userId, Context.ConnectionId);
             await base.OnConnectedAsync();
-
         }
-        public override async Task OnDisconnectedAsync(Exception? exception)
+
+        // Client calls: connection.invoke("SendMessage", { receiverId, content })
+        public async Task SendMessage(SendMessageRequestDto request)
         {
-            var result = Guid.TryParse(Context.GetHttpContext()?.Request.Query["userId"], out Guid userId);
-            if (result)
+            // The sender comes from the connection, not from the client's arguments - so it can't be faked per message.
+            var senderId = Guid.Parse(Context.UserIdentifier!);
+
+            if (string.IsNullOrWhiteSpace(request.Content))
             {
-                _connectionTracker.Remove(userId, Context.ConnectionId);
-
+                throw new HubException("Message is empty");
             }
-            await base.OnDisconnectedAsync(exception);
-        }
-
-        public async Task SendMessage(string content, Guid senderId, Guid receiverId)
-        {
-            var message = await _service.SaveMessage(content, senderId, receiverId);
-            var connectionIds = new List<string>();
-            var receiverConnectionId = _connectionTracker.GetConnectionId(receiverId);
-            if (receiverConnectionId != null)
+            if (request.Content.Length > MaxMessageLength)
             {
-                connectionIds.Add(receiverConnectionId);
+                throw new HubException($"Message is longer than {MaxMessageLength} characters");
             }
-            connectionIds.Add(Context.ConnectionId);
-            await Clients.Clients(connectionIds).SendAsync(ChatEvents.ReceiveMessage, message);
+            if (request.ReceiverId == senderId)
+            {
+                throw new HubException("You can't send a message to yourself");
+            }
 
+            var message = await _service.SaveMessage(senderId, request.ReceiverId, request.Content.Trim());
+            if (message == null)
+            {
+                throw new HubException("Receiver not found");
+            }
 
+            // Clients.Users = every open connection (tab/device) of both users.
+            // The sender gets it too, so all of the sender's tabs show the message with its real Id and CreateAt.
+            await Clients.Users(senderId.ToString(), request.ReceiverId.ToString()).ReceiveMessage(message);
         }
-
     }
 }

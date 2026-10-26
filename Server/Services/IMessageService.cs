@@ -1,21 +1,13 @@
-using Server.Models;
-
-
+using Server.DTOs;
 
 
 namespace Server.Services
 {
-    
-
     public interface IMessageService
     {
-        
-        public Task<Message> SaveMessage(string content,Guid SenderId,Guid ReceiverId);
+        // Returns null when the receiver doesn't exist.
+        Task<MessageDto?> SaveMessage(Guid senderId, Guid receiverId, string content);
 
-        public Task<List<Message>> GetChatHistory(Guid user1, Guid user2);
-
+        Task<List<MessageDto>> GetChatHistory(Guid user1, Guid user2);
     }
-
-
-
 }

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { login, Register } from "../../services/UserService";
 import { useNavigate } from "react-router-dom";
+import { useCurrentUser } from "../../Auth/CurrentUserProvider";
 import "./LoginPage.scss";
 
 
@@ -13,6 +14,7 @@ const LoginPage: React.FC = () => {
     const [isRegister, setIsRegister] = useState(false);
     const [error, setError] = useState("");
     const navigate = useNavigate();
+    const { setUser } = useCurrentUser();
 
     const handleSubmit = async () => {
         setError("");
@@ -26,6 +28,7 @@ const LoginPage: React.FC = () => {
             } else {
                 const user = await login(username, password);
                 if (user) {
+                    setUser(user);
                     navigate("/home");
                 }
             }
